@@ -1,3 +1,5 @@
+This project is from https://github.com/tkuanlun350/Tensorflow-SegNet?tdsourcetag=s_pcqq_aiomsg. I use it to learn more about semantic segmentation.
+---
 # Tensorflow-SegNet
 Implement slightly different (see below for detail) [SegNet](http://arxiv.org/abs/1511.00561) in tensorflow,
 successfully trained segnet-basic in CamVid dataset.
