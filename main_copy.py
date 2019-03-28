@@ -4,27 +4,40 @@ import model
 FLAGS = tf.app.flags.FLAGS
 
 #tf.app.flags.DEFINE_string('testing', 'aa', """ checkpoint file """)
-tf.app.flags.DEFINE_string('testing', "E:/workspace/mystoreroom/segnet1/SegNet/Logs/model.ckpt-19999", """checkfile""")
+# tf.app.flags.DEFINE_string('testing', "E:/workspace/mystoreroom/segnet1/SegNet/Logs/model.ckpt-19999", """checkfile""")
+tf.app.flags.DEFINE_string('testing', "", """checkfile""")
+
 tf.app.flags.DEFINE_string('finetune', '', """ finetune checkpoint file """)
 tf.app.flags.DEFINE_integer('batch_size', "5", """ batch_size """)
 tf.app.flags.DEFINE_float('learning_rate', "1e-3", """ initial lr """)
-tf.app.flags.DEFINE_string('log_dir', "E:/workspace/mystoreroom/segnet1/SegNet/Logs", """ dir to store ckpt """)
-tf.app.flags.DEFINE_string('image_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/train.txt", """ path to CamVid image """)
+# tf.app.flags.DEFINE_string('log_dir', "E:/workspace/mystoreroom/segnet1/SegNet/Logs", """ dir to store ckpt """)
+tf.app.flags.DEFINE_string('log_dir', "D:/segnet/Train_Log", """ dir to store ckpt """)
+
+# tf.app.flags.DEFINE_string('image_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/train.txt", """ path to CamVid image """)
+tf.app.flags.DEFINE_string('image_dir', "D:/segnet/data_set/train.txt", """ path to CamVid image """)
+
+
+# tf.app.flags.DEFINE_string('test_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/test.txt", """ path to CamVid test image """)
 tf.app.flags.DEFINE_string('test_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/test.txt", """ path to CamVid test image """)
-tf.app.flags.DEFINE_string('val_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/val.txt", """ path to CamVid val image """)
+
+# tf.app.flags.DEFINE_string('val_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/val.txt", """ path to CamVid val image """)
+tf.app.flags.DEFINE_string('val_dir', "D:/segnet/data_set/val.txt", """ path to CamVid val image """)
+
 tf.app.flags.DEFINE_integer('max_steps', "20000", """ max_steps """)
-tf.app.flags.DEFINE_integer('image_h', "360", """ image height """)
+# tf.app.flags.DEFINE_integer('image_h', "360", """ image height """)
+tf.app.flags.DEFINE_integer('image_h', "480", """ image height """)
+
 tf.app.flags.DEFINE_integer('image_w', "480", """ image width """)
 tf.app.flags.DEFINE_integer('image_c', "3", """ image channel (RGB) """)
 tf.app.flags.DEFINE_integer('num_class', "11", """ total class number """)
 tf.app.flags.DEFINE_boolean('save_image', True, """ whether to save predicted image """)
 
 def checkArgs():
-    if FLAGS.testing != '':
+    if FLAGS.testing == '1':
         print('The model is set to Testing')
         print("check point file: %s"%FLAGS.testing)
         print("CamVid testing dir: %s"%FLAGS.test_dir)
-    elif FLAGS.finetune != '':
+    elif FLAGS.finetune == '1':
         print('The model is set to Finetune from ckpt')
         print("check point file: %s"%FLAGS.finetune)
         print("CamVid Image dir: %s"%FLAGS.image_dir)
@@ -42,9 +55,9 @@ def checkArgs():
 
 def main(args):
     checkArgs()
-    if FLAGS.testing:
+    if FLAGS.testing != '':
         model.test(FLAGS)
-    elif FLAGS.finetune:
+    elif FLAGS.finetune != '':
         model.training(FLAGS, is_finetune=True)
     else:
         model.training(FLAGS, is_finetune=False)
