@@ -53,6 +53,7 @@ def checkArgs():
     print("Log dir: %s"%FLAGS.log_dir)
 
 
+
 def main(args):
     checkArgs()
     if FLAGS.testing != '':
