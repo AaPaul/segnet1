@@ -2,6 +2,11 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 
+import os
+
+from matplotlib import pyplot as plt
+
+
 def _activation_summary(x):
   """Helper to create summaries for activations.
 
@@ -59,7 +64,7 @@ def _variable_on_cpu(name, shape, initializer):
     var = tf.get_variable(name, shape, initializer=initializer)
   return var
 
-def _variable_with_weight_decay(name, shape, initializer, wd):
+def _variable_with_weight_decay(name, shape, initializer, wd):  #  权重衰减
   """Helper to create an initialized Variable with weight decay.
 
   Note that the Variable is initialized with a truncated normal distribution.
@@ -112,7 +117,10 @@ def writeImage(image, filename):
     rgb[:,:,1] = g/1.0
     rgb[:,:,2] = b/1.0
     im = Image.fromarray(np.uint8(rgb))
-    im.save(filename)
+    # im.save(filename)
+    # outfile = os.path.join()
+    # file = os.path.dirname(__file__)
+    im.save("E:/workspace/mystoreroom/segnet1/test_pic/others" + filename)
 
 def storeImageQueue(data, labels, step):
   """ data and labels are all numpy arrays """

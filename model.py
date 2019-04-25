@@ -15,6 +15,7 @@ from Utils import _variable_with_weight_decay, _variable_on_cpu, _add_loss_summa
     print_hist_summery, get_hist, per_class_acc, writeImage
 from Inputs import *
 
+
 # Constants describing the training process.
 MOVING_AVERAGE_DECAY = 0.9999  # The decay to use for the moving average.
 NUM_EPOCHS_PER_DECAY = 350.0  # Epochs after which learning rate decays.
@@ -103,7 +104,7 @@ def weighted_loss(logits, labels, num_classes, head=None):
 
     return loss
 
-
+# 这里就是分类的损失函数？
 def cal_loss(logits, labels):
     loss_weight = np.array([
         0.2595,
@@ -162,7 +163,7 @@ def get_deconv_filter(f_shape):
     return tf.get_variable(name="up_filter", initializer=init,
                            shape=weights.shape)
 
-
+# deconvolution == upsample
 def deconv_layer(inputT, f_shape, output_shape, stride=2, name=None):
     # output_shape = [b, w, h, c]
     # sess_temp = tf.InteractiveSession()
@@ -183,8 +184,9 @@ def batch_norm_layer(inputT, is_training, scope):
                                                         updates_collections=None, center=False, scope=scope + "_bn",
                                                         reuse=True))
 
-
-def inference(images, labels, batch_size, phase_train):
+# 四个卷积层和池化层
+# def inference(images, labels, batch_size, phase_train):  #训练时需要labels
+def inference(images, batch_size, phase_train):  # 测试不需要
     # norm1
     norm1 = tf.nn.lrn(images, depth_radius=5, bias=1.0, alpha=0.0001, beta=0.75,
                       name='norm1')
@@ -217,7 +219,7 @@ def inference(images, labels, batch_size, phase_train):
     # upsample4
     # Need to change when using different dataset out_w, out_h
     # upsample4 = upsample_with_pool_indices(pool4, pool4_indices, pool4.get_shape(), out_w=45, out_h=60, scale=2, name='upsample4')
-    upsample4 = deconv_layer(pool4, [2, 2, 64, 64], [batch_size, 45, 60, 64], 2, "up4")
+    upsample4 = deconv_layer(pool4, [2, 2, 64, 64], [batch_size, 45, 60, 64], 2, "up4")  # 这里为什么要定义宽度为45，高度为60呢
     # decode 4
     conv_decode4 = conv_layer_with_bn(upsample4, [7, 7, 64, 64], phase_train, False, name="conv_decode4")
 
@@ -251,9 +253,11 @@ def inference(images, labels, batch_size, phase_train):
         conv_classifier = tf.nn.bias_add(conv, biases, name=scope.name)
 
     logit = conv_classifier
-    loss = cal_loss(conv_classifier, labels)
+    # 要和真实值比较时候才需要loss
+    # loss = cal_loss(conv_classifier, labels)
 
-    return loss, logit
+    # return loss, logit
+    return logit
 
 
 def train(total_loss, global_step):
@@ -292,29 +296,40 @@ def train(total_loss, global_step):
 def test(FLAGS):
     max_steps = FLAGS.max_steps
     batch_size = FLAGS.batch_size
-    train_dir = FLAGS.log_dir  # /tmp3/first350/TensorFlow/Logs
-    test_dir = FLAGS.test_dir  # /tmp3/first350/SegNet-Tutorial/CamVid/train.txt
-    test_ckpt = FLAGS.testing
-    image_w = FLAGS.image_w
-    image_h = FLAGS.image_h
+    train_dir = FLAGS.log_dir  # 'E:/workspace/mystoreroom/segnet1/SegNet/Logs'     # /tmp3/first350/TensorFlow/Logs
+    test_dir = FLAGS.test_dir  # 'E:/workspace/mystoreroom/segnet1/SegNet/CamVid/test.txt'     #/tmp3/first350/SegNet-Tutorial/CamVid/train.txt
+    test_ckpt = FLAGS.testing  # 'E:/workspace/mystoreroom/segnet1/SegNet/Logs/model.ckpt-19999'
+
+    # 改成测试图片的格式
+    image_w = 2048
+    image_h = 1024
     image_c = FLAGS.image_c
+
+    # image_w = FLAGS.image_w
+    # image_h = FLAGS.image_h
+    # image_c = FLAGS.image_c
+
     # testing should set BATCH_SIZE = 1
     batch_size = 1
     count = 0
 
-    image_filenames, label_filenames = get_filename_list(test_dir)
+    # image_filenames, label_filenames = get_filename_list(test_dir)
+    image_filenames = get_filename_list(test_dir)
 
     test_data_node = tf.placeholder(
         tf.float32,
         shape=[batch_size, image_h, image_w, image_c])
 
-    test_labels_node = tf.placeholder(tf.int64, shape=[batch_size, 360, 480, 1])
+# 测试其他的也就不需要label啦
+#     test_labels_node = tf.placeholder(tf.int64, shape=[batch_size, 360, 480, 1])
 
     phase_train = tf.placeholder(tf.bool, name='phase_train')
 
-    loss, logits = inference(test_data_node, test_labels_node, batch_size, phase_train)
-
-    pred = tf.argmax(logits, axis=3)
+    # 这些预测的loss函数也不需要了，因为不需要计算与真实值的偏差
+    # loss, logits = inference(test_data_node, test_labels_node, batch_size, phase_train)
+    logits = inference(test_data_node, batch_size, phase_train)  # LOGITS是什么东西
+    # 这一步也不需要了
+    pred = tf.argmax(logits, axis=3)    # 这又是什么东西，找出俩的类型和数值来
     # get moving avg
     variable_averages = tf.train.ExponentialMovingAverage(
         MOVING_AVERAGE_DECAY)
@@ -327,39 +342,55 @@ def test(FLAGS):
     with tf.Session() as sess:
         # Load checkpoint
         saver.restore(sess, test_ckpt)
-
-        images, labels = get_all_test_data(image_filenames, label_filenames)
+    # 只对图片数据进行获取和相应操作
+    #     images, labels = get_all_test_data(image_filenames, label_filenames)
+        images = get_all_test_data(image_filenames)
 
         threads = tf.train.start_queue_runners(sess=sess)
         hist = np.zeros((NUM_CLASSES, NUM_CLASSES))
-        for image_batch, label_batch in zip(images, labels):
 
+        # for image_batch, label_batch in zip(images, labels):
+        # for image_batch in zip(images):
+        for image_batch in images:
             feed_dict = {
                 test_data_node: image_batch,
-                test_labels_node: label_batch,
+                # test_labels_node: label_batch,
                 phase_train: False
             }
+        # 这句代码什么意思？暂时注释掉，看看是否对预测有影响
+        # 肯定有影响，下面保存预测图片需要im变量，不能注释
+            # 是不是不需要logits？
+            # dense_prediction, im = sess.run([logits, pred], feed_dict=feed_dict)
+            dense_prediction, im = sess.run(pred, feed_dict=feed_dict)
+        #     im = sess.run(pred, feed_dict=feed_dict)
 
-            dense_prediction, im = sess.run([logits, pred], feed_dict=feed_dict)
             # output_image to verify
             if (FLAGS.save_image):
-                writeImage(im[0], 'testing_image.png')
+                writeImage(im[0], 'testing_image1'+'%d.png' % count)
+            # 展示测试图片 这里不行
+            # im_show= im[0].reshape(360, 480, 3)
+            # # im[0].show()
+            # im_show.imshow()
+            # plt.show()
+            # # im[count].imshow()
+            # # plt.show()
                 # writeImage(im[0], 'out_images/'+str(image_filenames[count]).split('/')[-1])
 
-            hist += get_hist(dense_prediction, label_batch)
-            count += 1
-        acc_total = np.diag(hist).sum() / hist.sum()
-        iu = np.diag(hist) / (hist.sum(1) + hist.sum(0) - np.diag(hist))
-        print("acc: ", acc_total)
-        print("mean IU: ", np.nanmean(iu))
+# 后面的是将真实值和预测值进行对比
+#             hist += get_hist(dense_prediction, label_batch)
+#             count += 1
+#         acc_total = np.diag(hist).sum() / hist.sum()
+#         iu = np.diag(hist) / (hist.sum(1) + hist.sum(0) - np.diag(hist))
+#         print("acc: ", acc_total)
+#         print("mean IU: ", np.nanmean(iu))
 
 
 def training(FLAGS, is_finetune=False):
     max_steps = FLAGS.max_steps
     batch_size = FLAGS.batch_size
-    train_dir = FLAGS.log_dir  # /tmp3/first350/TensorFlow/Logs
-    image_dir = FLAGS.image_dir  # /tmp3/first350/SegNet-Tutorial/CamVid/train.txt
-    val_dir = FLAGS.val_dir  # /tmp3/first350/SegNet-Tutorial/CamVid/val.txt
+    train_dir = FLAGS.log_dir  # E:/workspace/mystoreroom/segnet1/SegNet/Logs  #/tmp3/first350/TensorFlow/Logs
+    image_dir = FLAGS.image_dir  # E:/workspace/mystoreroom/segnet1/SegNet/CamVid/train.txt   #/tmp3/first350/SegNet-Tutorial/CamVid/train.txt
+    val_dir = FLAGS.val_dir  # E:/workspace/mystoreroom/segnet1/SegNet/CamVid/val.txt   #/tmp3/first350/SegNet-Tutorial/CamVid/val.txt
     finetune_ckpt = FLAGS.finetune
     image_w = FLAGS.image_w
     image_h = FLAGS.image_h
@@ -433,7 +464,8 @@ def training(FLAGS, is_finetune=False):
 
                 assert not np.isnan(loss_value), 'Model diverged with loss = NaN'
 
-                if step % 10 == 0:
+                # if step % 10 == 0:
+                if step % 1000 == 0:
                     num_examples_per_step = batch_size
                     examples_per_sec = num_examples_per_step / duration
                     sec_per_batch = float(duration)
