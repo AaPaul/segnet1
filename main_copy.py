@@ -16,8 +16,8 @@ tf.app.flags.DEFINE_float('learning_rate', "1e-3", """ initial lr """)
 tf.app.flags.DEFINE_string('log_dir', "E:/workspace/mystoreroom/segnet1/SegNet/Logs", """ dir to store ckpt """)
 tf.app.flags.DEFINE_string('image_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/train.txt", """ path to CamVid image """)
 
-# tf.app.flags.DEFINE_string('test_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/test.txt", """ path to CamVid test image """)
-tf.app.flags.DEFINE_string('test_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/t1.txt", """ path to CamVid test image """)
+tf.app.flags.DEFINE_string('test_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/test.txt", """ path to CamVid test image """)
+# tf.app.flags.DEFINE_string('test_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/t1.txt", """ path to CamVid test image """)
 
 tf.app.flags.DEFINE_string('val_dir', "E:/workspace/mystoreroom/segnet1/SegNet/CamVid/val.txt", """ path to CamVid val image """)
 tf.app.flags.DEFINE_integer('max_steps', "20000", """ max_steps """)

@@ -185,8 +185,8 @@ def batch_norm_layer(inputT, is_training, scope):
                                                         reuse=True))
 
 # 四个卷积层和池化层
-def inference(images, labels, batch_size, phase_train):  #训练和测试集测试时需要labels
-# def inference(images, batch_size, phase_train):  # 新的测试不需要
+# def inference(images, labels, batch_size, phase_train):  #训练和测试集测试时需要labels
+def inference(images, batch_size, phase_train):  # 新的测试不需要
     # norm1
     norm1 = tf.nn.lrn(images, depth_radius=5, bias=1.0, alpha=0.0001, beta=0.75,
                       name='norm1')
@@ -219,31 +219,31 @@ def inference(images, labels, batch_size, phase_train):  #训练和测试集测�
     # upsample4
     # Need to change when using different dataset out_w, out_h
     # upsample4 = upsample_with_pool_indices(pool4, pool4_indices, pool4.get_shape(), out_w=45, out_h=60, scale=2, name='upsample4')
-    upsample4 = deconv_layer(pool4, [2, 2, 64, 64], [batch_size, 45, 60, 64], 2, "up4")  # 注意这里的定义宽度为45，高度为60
-    # upsample4 = deconv_layer(pool4, [2, 2, 64, 64], [batch_size, 128, 256, 64], 2, "up4")  # 注意比较,下同
+    # upsample4 = deconv_layer(pool4, [2, 2, 64, 64], [batch_size, 45, 60, 64], 2, "up4")  # 注意这里的定义宽度为45，高度为60
+    upsample4 = deconv_layer(pool4, [2, 2, 64, 64], [batch_size, 128, 256, 64], 2, "up4")  # 注意比较,下同
     # decode 4
     conv_decode4 = conv_layer_with_bn(upsample4, [7, 7, 64, 64], phase_train, False, name="conv_decode4")
 
     # upsample 3
     # upsample3 = upsample_with_pool_indices(conv_decode4, pool3_indices, conv_decode4.get_shape(), scale=2, name='upsample3')
-    upsample3 = deconv_layer(conv_decode4, [2, 2, 64, 64], [batch_size, 90, 120, 64], 2, "up3")
-    # upsample3 = deconv_layer(conv_decode4, [2, 2, 64, 64], [batch_size, 256, 512, 64], 2, "up3")
+    # upsample3 = deconv_layer(conv_decode4, [2, 2, 64, 64], [batch_size, 90, 120, 64], 2, "up3")
+    upsample3 = deconv_layer(conv_decode4, [2, 2, 64, 64], [batch_size, 256, 512, 64], 2, "up3")
 
     # decode 3
     conv_decode3 = conv_layer_with_bn(upsample3, [7, 7, 64, 64], phase_train, False, name="conv_decode3")
 
     # upsample2
     # upsample2 = upsample_with_pool_indices(conv_decode3, pool2_indices, conv_decode3.get_shape(), scale=2, name='upsample2')
-    upsample2 = deconv_layer(conv_decode3, [2, 2, 64, 64], [batch_size, 180, 240, 64], 2, "up2")
-    # upsample2 = deconv_layer(conv_decode3, [2, 2, 64, 64], [batch_size, 512, 1024, 64], 2, "up2")
+    # upsample2 = deconv_layer(conv_decode3, [2, 2, 64, 64], [batch_size, 180, 240, 64], 2, "up2")
+    upsample2 = deconv_layer(conv_decode3, [2, 2, 64, 64], [batch_size, 512, 1024, 64], 2, "up2")
 
     # decode 2
     conv_decode2 = conv_layer_with_bn(upsample2, [7, 7, 64, 64], phase_train, False, name="conv_decode2")
 
     # upsample1
     # upsample1 = upsample_with_pool_indices(conv_decode2, pool1_indices, conv_decode2.get_shape(), scale=2, name='upsample1')
-    upsample1 = deconv_layer(conv_decode2, [2, 2, 64, 64], [batch_size, 360, 480, 64], 2, "up1")
-    # upsample1 = deconv_layer(conv_decode2, [2, 2, 64, 64], [batch_size, 1024, 2048, 64], 2, "up1")
+    # upsample1 = deconv_layer(conv_decode2, [2, 2, 64, 64], [batch_size, 360, 480, 64], 2, "up1")
+    upsample1 = deconv_layer(conv_decode2, [2, 2, 64, 64], [batch_size, 1024, 2048, 64], 2, "up1")
 
     # decode4
     conv_decode1 = conv_layer_with_bn(upsample1, [7, 7, 64, 64], phase_train, False, name="conv_decode1")
@@ -261,9 +261,9 @@ def inference(images, labels, batch_size, phase_train):  #训练和测试集测�
 
     logit = conv_classifier
     # 要和真实值比较时候才需要loss
-    loss = cal_loss(conv_classifier, labels)
-    return loss, logit
-    # return logit
+    # loss = cal_loss(conv_classifier, labels)
+    # return loss, logit
+    return logit
 
 
 def train(total_loss, global_step):
@@ -307,20 +307,20 @@ def test(FLAGS):
     test_ckpt = FLAGS.testing  # 'E:/workspace/mystoreroom/segnet1/SegNet/Logs/model.ckpt-19999'
 
     # 改成测试图片的格式
-    # image_w = 2048
-    # image_h = 1024
-    # image_c = FLAGS.image_c
-
-    image_w = FLAGS.image_w
-    image_h = FLAGS.image_h
+    image_w = 2048
+    image_h = 1024
     image_c = FLAGS.image_c
+
+    # image_w = FLAGS.image_w
+    # image_h = FLAGS.image_h
+    # image_c = FLAGS.image_c
 
     # testing should set BATCH_SIZE = 1
     batch_size = 1
     count = 0
 
-    image_filenames, label_filenames = get_filename_list(test_dir)
-    # image_filenames = get_filename_list(test_dir)
+    # image_filenames, label_filenames = get_filename_list(test_dir)
+    image_filenames = get_filename_list(test_dir)
 
     test_data_node = tf.placeholder(
         tf.float32,
@@ -332,8 +332,8 @@ def test(FLAGS):
     phase_train = tf.placeholder(tf.bool, name='phase_train')
 
     # 这些预测的loss函数也不需要了，因为不需要计算与真实值的偏差
-    loss, logits = inference(test_data_node, test_labels_node, batch_size, phase_train)
-    # logits = inference(test_data_node, batch_size, phase_train)  # LOGITS是什么东西
+    # loss, logits = inference(test_data_node, test_labels_node, batch_size, phase_train)
+    logits = inference(test_data_node, batch_size, phase_train)  # LOGITS是什么东西
 
     pred = tf.argmax(logits, axis=3)    # 这又是什么东西，找出俩的类型和数值来
     # get moving avg
@@ -349,26 +349,26 @@ def test(FLAGS):
         # Load checkpoint
         saver.restore(sess, test_ckpt)
     # 只对图片数据进行获取和相应操作
-        images, labels = get_all_test_data(image_filenames, label_filenames)
-        # images = get_all_test_data(image_filenames)
+    #     images, labels = get_all_test_data(image_filenames, label_filenames)
+        images = get_all_test_data(image_filenames)
 
         threads = tf.train.start_queue_runners(sess=sess)
         hist = np.zeros((NUM_CLASSES, NUM_CLASSES))
 
-        for image_batch, label_batch in zip(images, labels):
+        # for image_batch, label_batch in zip(images, labels):
         # for image_batch in zip(images):
-        # for image_batch in images:
+        for image_batch in images:
             feed_dict = {
                 test_data_node: image_batch,
-                test_labels_node: label_batch,
+                # test_labels_node: label_batch,
                 phase_train: False
             }
         # 这句代码什么意思？暂时注释掉，看看是否对预测有影响
         # 肯定有影响，下面保存预测图片需要im变量，不能注释
             # 是不是不需要logits？
-            dense_prediction, im = sess.run([logits, pred], feed_dict=feed_dict)
+            # dense_prediction, im = sess.run([logits, pred], feed_dict=feed_dict)
             # dense_prediction, im = sess.run(pred, feed_dict=feed_dict)
-            # im = sess.run(pred, feed_dict=feed_dict)
+            im = sess.run(pred, feed_dict=feed_dict)
 
             # output_image to verify
             if (FLAGS.save_image):
@@ -384,11 +384,11 @@ def test(FLAGS):
                 # writeImage(im[0], 'out_images/'+str(image_filenames[count]).split('/')[-1])
 
 # 后面的是将真实值和预测值进行对比
-            hist += get_hist(dense_prediction, label_batch)
-        acc_total = np.diag(hist).sum() / hist.sum()
-        iu = np.diag(hist) / (hist.sum(1) + hist.sum(0) - np.diag(hist))
-        print("acc: ", acc_total)
-        print("mean IU: ", np.nanmean(iu))
+#             hist += get_hist(dense_prediction, label_batch)
+#         acc_total = np.diag(hist).sum() / hist.sum()
+#         iu = np.diag(hist) / (hist.sum(1) + hist.sum(0) - np.diag(hist))
+#         print("acc: ", acc_total)
+#         print("mean IU: ", np.nanmean(iu))
 
 
 def training(FLAGS, is_finetune=False):

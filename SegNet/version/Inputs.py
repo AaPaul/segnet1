@@ -90,7 +90,7 @@ def CamVid_reader(filename_queue):
 def get_filename_list(path):
   fd = open(path)
   image_filenames = []
-  label_filenames = []
+  # label_filenames = []
   filenames = []
   # fpath = "/media/upc/059e868b-58e7-4450-91b0-aed186f1292a/Coastal classification/segnet1"
   fpath = "E:/workspace/mystoreroom/segnet1"
@@ -98,9 +98,9 @@ def get_filename_list(path):
   for i in fd:  # list中读取完当前后自动读下一个
     i = i.strip().split(" ")  #  头尾之间的空格、制表符等之类的空白符删掉
     image_filenames.append(fpath + i[0])
-    label_filenames.append(fpath + i[1])
-  return image_filenames, label_filenames    # 233张图片以及233张标签图片
-  # return image_filenames
+    # label_filenames.append(fpath + i[1])
+  # return image_filenames, label_filenames    # 233张图片以及233张标签图片
+  return image_filenames
 
 def CamVidInputs(image_filenames, label_filenames, batch_size):
 
@@ -124,23 +124,23 @@ def CamVidInputs(image_filenames, label_filenames, batch_size):
                                          shuffle=True)
 
 # 这里将获取图片和图片标签列表改为只获取图片列表
-def get_all_test_data(im_list, la_list):
-# def get_all_test_data(im_list):
+# def get_all_test_data(im_list, la_list):
+def get_all_test_data(im_list):
   images = []
   labels = []
   index = 0
 
-  for im_filename, la_filename in zip(im_list, la_list):
+  # for im_filename, la_filename in zip(im_list, la_list):
   # for im_filename in zip(im_list):  #因为原来是两个列表，组成了一个元组
-  # for im_filename in im_list:
+  for im_filename in im_list:
     im = np.array(skimage.io.imread(im_filename), np.float32)
     im = im[np.newaxis]
 
   # 关于标签的都注释掉
-    la = skimage.io.imread(la_filename)
-    la = la[np.newaxis]
-    la = la[...,np.newaxis]
-    labels.append(la)
+  #   la = skimage.io.imread(la_filename)
+  #   la = la[np.newaxis]
+  #   la = la[...,np.newaxis]
+  #   labels.append(la)
     images.append(im)
-  return images, labels
-  # return images
+  # return images, labels
+  return images
