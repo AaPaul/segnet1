@@ -372,7 +372,7 @@ def test(FLAGS):
 
             # output_image to verify
             if (FLAGS.save_image):
-                writeImage(im[0], 'testing_image1'+'%d.png' % count)
+                writeImage(im[0], 'testing_image'+'%d.png' % count)
                 count += 1
             # 展示测试图片 这里不行
             # im_show= im[0].reshape(360, 480, 3)
