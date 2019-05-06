@@ -20,4 +20,5 @@ import cv2
 im = "E:\\workspace\\mystoreroom\\segnet1\\SegNet\\CamVid\\testannot\\0001TP_008550.png"
 img = cv2.imread(im, 0)
 plt.imshow(img)
+plt.savefig("E:\\workspace\\mystoreroom\\segnet1\\SegNet\\CamVid\\testimg")
 plt.show()
