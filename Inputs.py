@@ -135,12 +135,6 @@ def get_all_test_data(im_list):
   for im_filename in im_list:
     im = np.array(skimage.io.imread(im_filename), np.float32)
     im = im[np.newaxis]
-
-  # 关于标签的都注释掉
-  #   la = skimage.io.imread(la_filename)
-  #   la = la[np.newaxis]
-  #   la = la[...,np.newaxis]
-  #   labels.append(la)
     images.append(im)
-  # return images, labels
+
   return images

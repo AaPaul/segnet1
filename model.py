@@ -300,10 +300,10 @@ def train(total_loss, global_step):
 
 
 def test(FLAGS):
-    max_steps = FLAGS.max_steps
-    batch_size = FLAGS.batch_size
-    train_dir = FLAGS.log_dir  # 'E:/workspace/mystoreroom/segnet1/SegNet/Logs'     # /tmp3/first350/TensorFlow/Logs
-    test_dir = FLAGS.test_dir  # 'E:/workspace/mystoreroom/segnet1/SegNet/CamVid/test.txt'     #/tmp3/first350/SegNet-Tutorial/CamVid/train.txt
+    # max_steps = FLAGS.max_steps
+    # batch_size = FLAGS.batch_size
+    train_dir = FLAGS.log_dir  # 'E:/workspace/mystoreroom/segnet1/SegNet/Logs'
+    test_dir = FLAGS.test_dir  # 'E:/workspace/mystoreroom/segnet1/SegNet/CamVid/t1.txt'
     test_ckpt = FLAGS.testing  # 'E:/workspace/mystoreroom/segnet1/SegNet/Logs/model.ckpt-19999'
 
     # 改成测试图片的格式
@@ -374,21 +374,6 @@ def test(FLAGS):
             if (FLAGS.save_image):
                 writeImage(im[0], 'testing_image'+'%d.png' % count)
                 count += 1
-            # 展示测试图片 这里不行
-            # im_show= im[0].reshape(360, 480, 3)
-            # # im[0].show()
-            # im_show.imshow()
-            # plt.show()
-            # # im[count].imshow()
-            # # plt.show()
-                # writeImage(im[0], 'out_images/'+str(image_filenames[count]).split('/')[-1])
-
-# 后面的是将真实值和预测值进行对比
-#             hist += get_hist(dense_prediction, label_batch)
-#         acc_total = np.diag(hist).sum() / hist.sum()
-#         iu = np.diag(hist) / (hist.sum(1) + hist.sum(0) - np.diag(hist))
-#         print("acc: ", acc_total)
-#         print("mean IU: ", np.nanmean(iu))
 
 
 def training(FLAGS, is_finetune=False):

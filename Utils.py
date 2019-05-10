@@ -120,18 +120,19 @@ def writeImage(image, filename):
     # im.save(filename)
     # outfile = os.path.join()
     # file = os.path.dirname(__file__)
-    im.save("E:/workspace/mystoreroom/segnet1/test_pic/" + filename)
+    # im.save("E:/workspace/mystoreroom/segnet1/test_pic" + filename)
+    im.save("E:/workspace/mystoreroom/segnet1/test_pic/return_pics/" + filename)
     # im.save("E:/workspace/mystoreroom/segnet1/test_pic/others/" + filename)
 
-def storeImageQueue(data, labels, step):
-  """ data and labels are all numpy arrays """
-  for i in range(BATCH_SIZE):
-    index = 0
-    im = data[i]
-    la = labels[i]
-    im = Image.fromarray(np.uint8(im))
-    im.save("batch_im_s%d_%d.png"%(step,i))
-    writeImage(np.reshape(la,(360,480)), "batch_la_s%d_%d.png"%(step,i))
+# def storeImageQueue(data, labels, step):
+#   """ data and labels are all numpy arrays """
+#   for i in range(BATCH_SIZE):
+#     index = 0
+#     im = data[i]
+#     la = labels[i]
+#     im = Image.fromarray(np.uint8(im))
+#     im.save("batch_im_s%d_%d.png"%(step,i))
+#     writeImage(np.reshape(la,(360,480)), "batch_la_s%d_%d.png"%(step,i))
 
 def fast_hist(a, b, n):
     k = (a >= 0) & (a < n)
