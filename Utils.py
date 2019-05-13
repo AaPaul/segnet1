@@ -121,7 +121,7 @@ def writeImage(image, filename):
     # outfile = os.path.join()
     # file = os.path.dirname(__file__)
     # im.save("E:/workspace/mystoreroom/segnet1/test_pic" + filename)
-    im.save("E:/workspace/mystoreroom/segnet1/test_pic/return_pics/" + filename)
+    im.save("E:/workspace/mystoreroom/segnet1/static/return_pics/" + filename)
     # im.save("E:/workspace/mystoreroom/segnet1/test_pic/others/" + filename)
 
 # def storeImageQueue(data, labels, step):
