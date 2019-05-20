@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>语义分割</title>
+
+</head>
+
+<body>
+  <img id="preview" />
+  <form id="upload">
+    <input type="file" name="file" id="file" onchange="imgPreview(this)" class="inputfile">
+    <label for="file">choose a file</label>
+  </form>
+  <script src="http://code.jquery.com/jquery-latest.js"></script>
+  <script type="text/javascript">
+    function imgPreview(fileDom) {
+      //判断是否支持FileReader
+      if (window.FileReader) {
+        var reader = new FileReader();
+      } else {
+        alert("您的设备不支持图片预览功能，如需该功能请升级您的设备！");
+      }
+
+      //获取文件
+      var file = fileDom.files[0];
+      var imageType = /^image\//;
+      //是否是图片
+      if (!imageType.test(file.type)) {
+        alert("请选择图片！");
+        return;
+      }
+      //读取完成
+      reader.onload = function(e) {
+        //获取图片dom
+        var img = document.getElementById("preview");
+        //图片路径设置为读取的图片
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+    $('input[type="file"]').on('change', doUpload);
+
+    function doUpload() {
+      // var file = this.files[0]
+      var formData = new FormData($("#upload")[0]);
+      $.ajax({
+        url: "http://127.0.0.1:8802/test",
+        type: 'POST',
+        dataType: "json",
+        data: formData,
+        cache: false,
+        processData: false,
+        contentType: false,
+        async: false,
+        success: function(data) {
+          // document.write("<img src=http://127.0.0.1:8802"+data+">")
+          // var src = "http://127.0.0.1:8802" + data;
+          var src = "data:image/png;base64," + data;
+          // window.onload = function() {
+          // var img = new Image();
+          // img.src = "http://127.0.0.1:8802" + data;
+          // document.body.updateChild(img);
+          document.getElementById('rp').src = src;
+          // }
+          // $('#rp').attr('src',src)
+          console.log(data)
+        },
+        error: function(data) {
+          console.log(data)
+        }
+      });
+    }
+  </script>
+  <img src="" id="rp" />
+  <style type="text/css">
+    .inputfile {
+      width: 0.1px;
+      height: 0.1px;
+      opacity: 0;
+      overflow: hidden;
+      position: absolute;
+      z-index: -1;
+    }
+
+    .inputfile+label {
+      font-size: 1.25em;
+      font-weight: 700;
+      color: black;
+      background-color: #ffff;
+      display: inline-block;
+    }
+
+    .inputfile:focus+label,
+    .inputfile+label:hover {
+      background-color: red;
+    }
+
+    .inputfile:focus+label {
+      outline: 1px dotted #000;
+      outline: -webkit-focus-ring-color auto 5px;
+    }
+  </style>
+</body>
+
+</html>
