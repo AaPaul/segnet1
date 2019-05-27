@@ -1,4 +1,11 @@
 This project is from https://github.com/tkuanlun350/Tensorflow-SegNet?tdsourcetag=s_pcqq_aiomsg. I use it to learn more about semantic segmentation.
+
+The main branch is 'main_copy' instead of 'master'. I also add a way to transfer pictures to a video in branch dev1.
+I have a bad habit in using git and github, as I don't have good branch management. 
+I will learn to manage the branch structure and merge the branches of the project
+
+
+
 ---
 # Tensorflow-SegNet
 Implement slightly different (see below for detail) [SegNet](http://arxiv.org/abs/1511.00561) in tensorflow,
